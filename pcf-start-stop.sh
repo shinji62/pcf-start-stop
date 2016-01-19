@@ -57,16 +57,17 @@ fi
 
 
 if [ "$1" == "start" ]; then
- startJobVMs=$(bundle exec bosh vms --detail|grep partition| awk -F '|' '{ print $4 }')
+ startJobVMs=$(bundle exec bosh vms --detail  | grep partition | awk -F '|' '{ print $2 }')
  bundle exec bosh vm resurrection enable
- for x in "${bootOrder[@]}"; do
-        for i in $startJobVMs; do
-                jobString=$i
-                jobType=$(echo "$jobString" | awk -F "-" '{ print $1 }')
-                 if [ "$x" == "$jobType" ];
+ for i in "${bootOrder[@]}"; do
+        for x in $startJobVMs; do
+                jobId=$(echo "$x" | awk -F "/" '{ print $1 }')
+                instanceId=$(echo "$x" | awk -F "/" '{ print $2 }')
+                jobType=$(echo "$jobId" | awk -F "-" '{ print $1 }')
+                 if [ "$i" == "$jobType" ];
                  then
-                        #echo FOUND "$jobString"
-                        bundle exec bosh -n start "$jobString"
+                        #echo FOUND "$jobId" instanceID "$instanceId"
+                        bundle exec bosh -n start "$jobId" "$instanceId"
                  fi
         done;
  done
